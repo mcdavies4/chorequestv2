@@ -3,13 +3,203 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#f59e0b" />
+
+    <!-- ── Primary SEO ───────────────────────────────────── -->
+    <title>ChoreQuest — Chore App for Kids | Allowance Tracker & Family Chore Chart</title>
+    <meta name="description" content="ChoreQuest is the #1 chore app for kids. Track chores, manage allowance, set savings goals and teach kids about money. Free family chore chart with coin rewards. Works with Venmo, Cash App & PayPal." />
+    <meta name="keywords" content="chore app for kids, allowance tracker, kids money management, family chore chart, teaching kids about money, chore chart app, kids allowance app, chore tracker, children money app, family chore organizer, kids savings goals, chore reward app" />
+    <meta name="author" content="ChoreQuest" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://chorequestv2.vercel.app/" />
+
+    <!-- ── Open Graph ─────────────────────────────────────── -->
+    <meta property="og:type"         content="website" />
+    <meta property="og:url"          content="https://chorequestv2.vercel.app/" />
+    <meta property="og:site_name"    content="ChoreQuest" />
+    <meta property="og:title"        content="ChoreQuest — Chore App for Kids & Family Allowance Tracker" />
+    <meta property="og:description"  content="The fun way to manage chores, reward effort and teach kids the value of money. Assign chores, track earnings, set savings goals and pay via Venmo or Cash App." />
+    <meta property="og:image"        content="https://chorequestv2.vercel.app/og-image.png" />
+    <meta property="og:image:width"  content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale"       content="en_US" />
+
+    <!-- ── Twitter Card ──────────────────────────────────── -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="ChoreQuest — Chore App for Kids & Allowance Tracker" />
+    <meta name="twitter:description" content="Assign chores, reward with coins, set savings goals and teach kids the value of money. Works with Venmo, Cash App & PayPal." />
+    <meta name="twitter:image"       content="https://chorequestv2.vercel.app/og-image.png" />
+
+    <!-- ── PWA / Mobile ──────────────────────────────────── -->
+    <meta name="apple-mobile-web-app-capable"          content="yes" />
+    <meta name="apple-mobile-web-app-title"            content="ChoreQuest" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color"         content="#f59e0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="/manifest.json" />
-    <title>ChoreQuest 🏆</title>
+
+    <!-- ── Favicon ───────────────────────────────────────── -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>" />
+
+    <!-- ── Structured Data JSON-LD ───────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://chorequestv2.vercel.app/#app",
+          "name": "ChoreQuest",
+          "url": "https://chorequestv2.vercel.app/",
+          "description": "ChoreQuest is a chore tracking and allowance management app for families. Assign chores to kids, reward them with coins, set savings goals and pay via Venmo, Cash App or PayPal.",
+          "applicationCategory": "LifestyleApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "offers": [
+            {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "name": "Free Plan",
+              "description": "1 kid, basic chores, coin balance and savings goal"
+            },
+            {
+              "@type": "Offer",
+              "price": "9.99",
+              "priceCurrency": "USD",
+              "name": "Premium Plan",
+              "description": "Unlimited kids, pay links, reward store, weekly reports and leaderboard",
+              "billingIncrement": "P1M"
+            }
+          ],
+          "featureList": [
+            "Chore tracking and approval workflow",
+            "Coin-based allowance system",
+            "Savings goals for kids",
+            "Pay links for Venmo Cash App and PayPal",
+            "Reward store",
+            "Weekly reports and earnings history",
+            "Family leaderboard",
+            "Push notifications",
+            "Kid PIN login"
+          ]
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://chorequestv2.vercel.app/#org",
+          "name": "ChoreQuest",
+          "url": "https://chorequestv2.vercel.app/",
+          "logo": "https://chorequestv2.vercel.app/icon-192.png"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is the best chore app for kids?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ChoreQuest is a top-rated chore app for kids that combines chore tracking, coin rewards, savings goals and real payment links. Parents assign chores, kids complete them and earn coins, and parents can pay via Venmo, Cash App or PayPal."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does ChoreQuest work as an allowance tracker?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ChoreQuest tracks every chore your child completes and automatically calculates their earnings. Parents approve completed chores, coins are added to the child's balance, and parents can send real money via Venmo, Cash App or PayPal with one tap."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is ChoreQuest free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, ChoreQuest has a free plan that includes 1 kid, basic chore tracking, coin balance and a savings goal. The Premium plan at $9.99/month adds unlimited kids, pay links, a reward store, weekly reports and a leaderboard."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I teach my kids about money with ChoreQuest?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ChoreQuest teaches kids about money by connecting effort to real rewards. Kids set savings goals, earn coins for completing chores, and learn to save up for things they want. Parents can pay in cash, via Venmo, Cash App, PayPal or any method they choose."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What age is ChoreQuest suitable for?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ChoreQuest is designed for children aged 3 to 17. Younger kids enjoy the visual chore tracking and coin rewards, while older kids appreciate the savings goals, leaderboard and reward store."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does the family chore chart work in ChoreQuest?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The ChoreQuest family chore chart lets parents assign specific chores to each child with custom icons and coin values. Kids log in with their own PIN, mark chores as done, and parents approve them from the parent dashboard. Premium families can track up to 4 kids on one account."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <!-- ── Preconnect for performance ─────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- ── Noscript fallback — crawlers read this ─────────── -->
+    <noscript>
+      <div style="font-family:sans-serif;max-width:800px;margin:40px auto;padding:20px;line-height:1.7">
+        <h1>ChoreQuest — Chore App for Kids &amp; Family Allowance Tracker</h1>
+        <p>ChoreQuest is the fun and easy way to manage chores, track allowance and teach kids the value of money. The modern family chore chart that actually works.</p>
+
+        <h2>The Best Chore App for Kids</h2>
+        <p>Tired of chore charts that get ignored? ChoreQuest turns chores into a game. Kids earn coins for every chore they complete, save up for goals they care about, and parents can pay via Venmo, Cash App, PayPal or good old-fashioned cash.</p>
+
+        <h2>Features</h2>
+        <ul>
+          <li><strong>Family chore chart</strong> — assign chores to each kid with custom icons and coin rewards</li>
+          <li><strong>Allowance tracker</strong> — automatically track what each child has earned</li>
+          <li><strong>Kids savings goals</strong> — kids set goals and watch their progress in real time</li>
+          <li><strong>Pay links</strong> — send real money via Venmo, Cash App or PayPal with one tap</li>
+          <li><strong>Reward store</strong> — kids redeem coins for screen time, treats and privileges</li>
+          <li><strong>Weekly reports</strong> — track earnings, completion rates and streaks over time</li>
+          <li><strong>Leaderboard</strong> — friendly competition between siblings</li>
+          <li><strong>Kids money management</strong> — teach financial responsibility from a young age</li>
+          <li><strong>Push notifications</strong> — instant alerts when chores need approval</li>
+        </ul>
+
+        <h2>Teaching Kids About Money</h2>
+        <p>ChoreQuest connects effort to reward in a way kids understand. By earning coins for completing chores and saving up for goals they care about, children develop healthy money habits that last a lifetime.</p>
+        <p>Pay however works for your family — cash, Venmo, Cash App, PayPal, bank transfer or piggy bank. ChoreQuest works with any payment method because it tracks the earning, not the transfer.</p>
+
+        <h2>Pricing</h2>
+        <p><strong>Free plan</strong> — 1 kid, basic chore tracking, coin balance, savings goal. No credit card required.</p>
+        <p><strong>Premium — $9.99/month</strong> — unlimited kids, pay links (Venmo, Cash App, PayPal), full reward store, weekly reports and leaderboard.</p>
+
+        <h2>Who is ChoreQuest for?</h2>
+        <p>ChoreQuest is designed for families with children aged 3 to 17. Whether your kids are just starting to learn about responsibility or are teenagers saving up for something big, ChoreQuest adapts to your family's needs.</p>
+
+        <h2>Frequently Asked Questions</h2>
+        <h3>Is ChoreQuest free?</h3>
+        <p>Yes. The free plan includes 1 kid, chore tracking, approval workflow, coin balance and a savings goal. Upgrade to Premium for $9.99/month to unlock unlimited kids, pay links, the reward store, weekly reports and the leaderboard.</p>
+
+        <h3>Do kids need their own payment account?</h3>
+        <p>No. ChoreQuest tracks what kids earn. You can pay them however you like — cash, Venmo, Cash App, PayPal or any other method. Older kids (13+) can set up their own Venmo or Cash App account if they want direct transfers.</p>
+
+        <h3>What devices does ChoreQuest work on?</h3>
+        <p>ChoreQuest is a web app that works on any device — iPhone, Android, tablet or desktop. No app store download required. It can be added to the home screen for a native app experience.</p>
+
+        <p><a href="https://chorequestv2.vercel.app/">Start for free → chorequestv2.vercel.app</a></p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
