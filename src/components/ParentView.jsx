@@ -3,19 +3,72 @@ import { ProgressBar, inp, lbl } from './UI'
 import { CHORE_ICONS, REWARDS } from '../lib/constants'
 import { startCheckout, openBillingPortal } from '../lib/stripe'
 
-// ── Leaderboard ──────────────────────────────────────────────
+// ── Upgrade Bottom Sheet ──────────────────────────────────────
+function UpgradeSheet({ featureName, onClose, onCheckout, busy }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: '#00000088', zIndex: 9000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#0f172a', borderRadius: '24px 24px 0 0', width: '100%', maxWidth: 430, padding: '28px 24px 40px', fontFamily: "'Nunito',sans-serif", animation: 'slideUp 0.3s cubic-bezier(.34,1.56,.64,1)' }}>
+        <div style={{ width: 40, height: 4, background: '#334155', borderRadius: 99, margin: '0 auto 24px' }} />
+        <div style={{ textAlign: 'center', marginBottom: 22 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>🔒</div>
+          <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 24, color: 'white', marginBottom: 6 }}>Premium Feature</div>
+          <div style={{ background: '#1e293b', border: '1.5px solid #f59e0b44', borderRadius: 12, padding: '8px 16px', display: 'inline-block' }}>
+            <span style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700 }}>✨ {featureName} requires Premium</span>
+          </div>
+        </div>
+        <div style={{ background: '#1e293b', border: '2px solid #f59e0b', borderRadius: 20, padding: '18px 16px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div><div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 20, color: 'white' }}>Premium</div><div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Billed monthly</div></div>
+            <div style={{ textAlign: 'right' }}><div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 30, color: '#f59e0b' }}>$9.99</div><div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>per month</div></div>
+          </div>
+          {[['👨‍👩‍👧','Unlimited kids'],['💸','Pay links (Venmo, Cash App, PayPal)'],['🛍️','Full Reward Store'],['📋','Weekly Reports & charts'],['🏆','Leaderboard']].map(([ic, t]) => (
+            <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 18 }}>{ic}</span>
+              <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>{t}</span>
+            </div>
+          ))}
+        </div>
+        <button onClick={onCheckout} disabled={busy} style={{ width: '100%', background: busy ? '#334155' : 'linear-gradient(135deg,#f59e0b,#f97316)', border: 'none', borderRadius: 16, padding: 15, fontFamily: "'Fredoka One',cursive", fontSize: 20, color: busy ? '#64748b' : 'white', cursor: busy ? 'not-allowed' : 'pointer', marginBottom: 10 }}>
+          {busy ? 'Redirecting...' : 'Upgrade to Premium 🚀'}
+        </button>
+        <button onClick={onClose} style={{ width: '100%', background: 'transparent', border: 'none', fontFamily: "'Nunito',sans-serif", fontWeight: 700, fontSize: 14, color: '#475569', cursor: 'pointer' }}>Maybe later</button>
+      </div>
+    </div>
+  )
+}
+
+// ── Gate wrapper ─────────────────────────────────────────────
+// Renders children if premium, otherwise shows lock + upgrade sheet on tap
+function Gate({ isPremium, featureName, onCheckout, busy, children }) {
+  const [showSheet, setShowSheet] = useState(false)
+  if (isPremium) return children
+  return (
+    <>
+      <div onClick={() => setShowSheet(true)} style={{ position: 'relative', cursor: 'pointer', userSelect: 'none' }}>
+        <div style={{ filter: 'blur(3px)', pointerEvents: 'none' }}>{children}</div>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0f172acc', borderRadius: 16, gap: 8 }}>
+          <span style={{ fontSize: 32 }}>🔒</span>
+          <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 16, color: 'white' }}>Premium Feature</div>
+          <div style={{ background: '#f59e0b', borderRadius: 99, padding: '5px 16px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 12, color: '#1e293b' }}>Unlock for $9.99/mo</div>
+        </div>
+      </div>
+      {showSheet && <UpgradeSheet featureName={featureName} onClose={() => setShowSheet(false)} onCheckout={onCheckout} busy={busy} />}
+    </>
+  )
+}
+
+// ── Leaderboard ───────────────────────────────────────────────
 function Leaderboard({ kids }) {
   const [metric, setMetric] = useState('streak')
   const metrics = [
-    { key: 'streak',  label: '🔥 Streak',  get: k => k.streak ?? 0,                                                                    fmt: v => `${v}d`,    color: '#f97316' },
-    { key: 'balance', label: '🪙 Balance', get: k => Number(k.balance ?? 0),                                                           fmt: v => `$${v.toFixed(2)}`, color: '#f59e0b' },
-    { key: 'done',    label: '✅ Done',    get: k => { const c=k.chores||[]; return c.length?c.filter(x=>x.done).length/c.length:0 },  fmt: v => `${Math.round(v*100)}%`, color: '#22c55e' },
+    { key: 'streak',  label: '🔥 Streak',  get: k => k.streak ?? 0,                                                                   fmt: v => `${v}d`,            color: '#f97316' },
+    { key: 'balance', label: '🪙 Balance', get: k => Number(k.balance ?? 0),                                                          fmt: v => `$${v.toFixed(2)}`, color: '#f59e0b' },
+    { key: 'done',    label: '✅ Done',    get: k => { const c=k.chores||[]; return c.length?c.filter(x=>x.done).length/c.length:0 }, fmt: v => `${Math.round(v*100)}%`, color: '#22c55e' },
   ]
   const cur    = metrics.find(m => m.key === metric)
   const ranked = [...kids].sort((a,b) => cur.get(b) - cur.get(a))
   const maxVal = Math.max(...kids.map(cur.get), 0.01)
   const MEDALS = ['🥇','🥈','🥉']
-
   return (
     <div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
@@ -25,11 +78,11 @@ function Leaderboard({ kids }) {
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16, marginBottom: 12 }}>
           {ranked.map((k, i) => {
             const val  = cur.get(k)
-            const barH = 40 + Math.round((val / maxVal) * 60)
+            const barH = 40 + Math.round((val/maxVal)*60)
             return (
               <div key={k.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: cur.color }}>{cur.fmt(val)}</div>
-                <div style={{ width: i===0?70:56, height: barH, background: i===0?cur.color:`${cur.color}55`, borderRadius: '8px 8px 0 0', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 6, transition: 'height 0.5s ease' }}>
+                <div style={{ width: i===0?70:56, height: barH, background: i===0?cur.color:`${cur.color}55`, borderRadius: '8px 8px 0 0', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 6 }}>
                   <span style={{ fontSize: i===0?32:24 }}>{k.avatar}</span>
                 </div>
                 <span style={{ fontSize: 20 }}>{MEDALS[i]||'🏅'}</span>
@@ -52,7 +105,6 @@ function WeeklySummary({ kid }) {
   const done = Number(w.chores_completed ?? 0)
   const tot  = Number(w.total_chores ?? 1)
   const pct  = tot > 0 ? Math.round((done/tot)*100) : 0
-
   return (
     <div>
       <div style={{ background: '#1e293b', border: '1.5px solid #334155', borderRadius: 18, padding: '14px 16px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -66,7 +118,7 @@ function WeeklySummary({ kid }) {
         {history.map((h, i) => <button key={i} onClick={() => setSel(i)} style={{ flexShrink: 0, background: sel===i?'#f59e0b':'#1e293b', border: sel===i?'none':'1.5px solid #334155', borderRadius: 12, padding: '7px 12px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 11, color: sel===i?'#1e293b':'#64748b', cursor: 'pointer', whiteSpace: 'nowrap' }}>{h.week_label}</button>)}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
-        {[['🪙', `$${Number(w.earned).toFixed(2)}`, 'Earned', '#f59e0b'], ['✅', `${done}/${tot}`, 'Completed', '#22c55e'], ['💸', Number(w.redeemed)>0?`$${Number(w.redeemed).toFixed(2)}`:'—', 'Redeemed', '#f472b6']].map(([ic,v,l,c]) => (
+        {[['🪙',`$${Number(w.earned).toFixed(2)}`,'Earned','#f59e0b'],['✅',`${done}/${tot}`,'Completed','#22c55e'],['💸',Number(w.redeemed)>0?`$${Number(w.redeemed).toFixed(2)}`:'—','Redeemed','#f472b6']].map(([ic,v,l,c]) => (
           <div key={l} style={{ background: '#0f172a', border: `1.5px solid ${c}44`, borderRadius: 14, padding: '12px 8px', textAlign: 'center' }}>
             <div style={{ fontSize: 20 }}>{ic}</div>
             <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 18, color: c }}>{v}</div>
@@ -86,10 +138,11 @@ function WeeklySummary({ kid }) {
 }
 
 // ── Manage Tab ────────────────────────────────────────────────
-function ManageTab({ kid, onSave, onDelete, onGoal, showToast }) {
+function ManageTab({ kid, isPremium, onSave, onDelete, onGoal, onAddKid, showToast, onCheckout, checkoutBusy }) {
   const [form,   setForm]   = useState(null)
   const [picker, setPicker] = useState(false)
   const [gForm,  setGForm]  = useState(null)
+  const [sheet,  setSheet]  = useState(false)
 
   const goalName = kid.goal_name ?? 'My Goal'
   const goalTgt  = Number(kid.goal_target ?? 10)
@@ -136,6 +189,24 @@ function ManageTab({ kid, onSave, onDelete, onGoal, showToast }) {
             <ProgressBar value={goalSvd} max={goalTgt} />
           </div>
         )}
+      </div>
+
+      {/* Add another kid — premium gate */}
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 17, color: '#f59e0b', marginBottom: 10 }}>👨‍👩‍👧 Kids</div>
+        {isPremium ? (
+          <button onClick={onAddKid} style={{ width: '100%', background: '#22c55e15', border: '1.5px solid #22c55e', borderRadius: 12, padding: 11, fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 13, color: '#22c55e', cursor: 'pointer' }}>+ Add Another Kid</button>
+        ) : (
+          <div onClick={() => setSheet(true)} style={{ cursor: 'pointer', background: '#1e293b', border: '1.5px dashed #334155', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 24 }}>🔒</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, color: 'white', fontSize: 14 }}>Add more kids</div>
+              <div style={{ fontSize: 12, color: '#475569', fontWeight: 600 }}>Premium — $9.99/mo</div>
+            </div>
+            <div style={{ background: '#f59e0b', borderRadius: 99, padding: '4px 12px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 11, color: '#1e293b' }}>Upgrade</div>
+          </div>
+        )}
+        {sheet && <UpgradeSheet featureName="Multiple Kids" onClose={() => setSheet(false)} onCheckout={onCheckout} busy={checkoutBusy} />}
       </div>
 
       {/* Chores */}
@@ -185,13 +256,13 @@ function ManageTab({ kid, onSave, onDelete, onGoal, showToast }) {
 }
 
 // ── Main ParentView ───────────────────────────────────────────
-export function ParentView({ data, plan, isPremium, familyId, userEmail, onApprove, onReject, onLogout, onMarkRead, onSaveChore, onDeleteChore, onSaveGoal, showToast, activeKidId, setActiveKidId }) {
-  const [tab,            setTab]            = useState('home')
-  const [checkoutBusy,   setCheckoutBusy]   = useState(false)
-  const [cashTag,        setCashTag]        = useState(() => localStorage.getItem('cq_cash') || '')
-  const [paypalName,     setPaypalName]     = useState(() => localStorage.getItem('cq_pp')   || '')
-  const [venmoName,      setVenmoName]      = useState(() => localStorage.getItem('cq_vm')   || '')
-  const [editPay,        setEditPay]        = useState(false)
+export function ParentView({ data, plan, isPremium, familyId, userEmail, onApprove, onReject, onLogout, onMarkRead, onSaveChore, onDeleteChore, onSaveGoal, onAddKid, showToast, activeKidId, setActiveKidId }) {
+  const [tab,          setTab]          = useState('home')
+  const [checkoutBusy, setCheckoutBusy] = useState(false)
+  const [cashTag,      setCashTag]      = useState(() => localStorage.getItem('cq_cash') || '')
+  const [paypalName,   setPaypalName]   = useState(() => localStorage.getItem('cq_pp')   || '')
+  const [venmoName,    setVenmoName]    = useState(() => localStorage.getItem('cq_vm')   || '')
+  const [editPay,      setEditPay]      = useState(false)
 
   const savePayLinks = () => {
     localStorage.setItem('cq_cash', cashTag)
@@ -228,10 +299,8 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
     catch (e) { showToast(`❌ ${e.message}`) }
   }
 
-  const bg = 'linear-gradient(160deg,#0f172a,#1e293b)'
-
   return (
-    <div style={{ minHeight: '100vh', background: bg, fontFamily: "'Nunito',sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg,#0f172a,#1e293b)', fontFamily: "'Nunito',sans-serif" }}>
       {/* Header */}
       <div style={{ padding: '20px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -321,9 +390,10 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
               : pending.map(chore => {
                   const amt     = Number(chore.coins).toFixed(2)
                   const noteEnc = encodeURIComponent(`${kid.name} chores - ${chore.title}`)
-                  const venmoUrl   = venmoName ? `venmo://paycharge?txn=pay&amount=${amt}&note=${noteEnc}&recipients=${venmoName}` : 'https://venmo.com/'
-                  const cashUrl    = cashTag   ? `https://cash.app/$${cashTag.replace('$','')}/${amt}` : 'https://cash.app/'
-                  const paypalUrl  = paypalName ? `https://paypal.me/${paypalName}/${amt}` : 'https://paypal.com/'
+                  const venmoUrl  = venmoName  ? `venmo://paycharge?txn=pay&amount=${amt}&note=${noteEnc}&recipients=${venmoName}` : 'https://venmo.com/'
+                  const cashUrl   = cashTag    ? `https://cash.app/$${cashTag.replace('$','')}/${amt}` : 'https://cash.app/'
+                  const paypalUrl = paypalName ? `https://paypal.me/${paypalName}/${amt}` : 'https://paypal.com/'
+
                   return (
                     <div key={chore.id} style={{ background: '#1e293b', border: '2px solid #fbbf24', borderRadius: 22, padding: 16, marginBottom: 12 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
@@ -337,20 +407,25 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
                         <button onClick={async () => { try { await onReject(kid.id, chore.id) } catch(e) { showToast(`❌ ${e.message}`) } }} style={{ background: '#ef444415', border: '2px solid #ef4444', borderRadius: 12, padding: 10, fontFamily: "'Fredoka One',cursive", fontSize: 15, color: '#ef4444', cursor: 'pointer' }}>✗ Reject</button>
                         <button onClick={async () => { try { await onApprove(kid.id, chore.id) } catch(e) { showToast(`❌ ${e.message}`) } }} style={{ background: '#22c55e', border: 'none', borderRadius: 12, padding: 10, fontFamily: "'Fredoka One',cursive", fontSize: 15, color: 'white', cursor: 'pointer' }}>✓ Approve!</button>
                       </div>
-                      <div style={{ borderTop: '1.5px solid #334155', marginBottom: 10 }} />
-                      <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>💸 Send ${amt}</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 7 }}>
-                        {[['💙','Venmo','#008cff',venmoUrl],['💚','Cash App','#00d64f',cashUrl],['💛','PayPal','#009cde',paypalUrl]].map(([em,lb,cl,url]) => (
-                          <a key={lb} href={url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                            <div style={{ background: `${cl}15`, border: `1.5px solid ${cl}`, borderRadius: 12, padding: '9px 4px', textAlign: 'center', cursor: 'pointer' }}>
-                              <div style={{ fontSize: 18, marginBottom: 2 }}>{em}</div>
-                              <div style={{ fontSize: 11, fontWeight: 800, color: cl }}>{lb}</div>
-                              <div style={{ fontSize: 10, color: '#475569', fontWeight: 600 }}>${amt}</div>
-                            </div>
-                          </a>
-                        ))}
+
+                      {/* Pay links — gated */}
+                      <div style={{ borderTop: '1.5px solid #334155', marginBottom: 10, paddingTop: 12 }}>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>💸 Send ${amt}</div>
+                        <Gate isPremium={isPremium} featureName="Pay Links" onCheckout={checkout} busy={checkoutBusy}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 7 }}>
+                            {[['💙','Venmo','#008cff',venmoUrl],['💚','Cash App','#00d64f',cashUrl],['💛','PayPal','#009cde',paypalUrl]].map(([em,lb,cl,url]) => (
+                              <a key={lb} href={url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                                <div style={{ background: `${cl}15`, border: `1.5px solid ${cl}`, borderRadius: 12, padding: '9px 4px', textAlign: 'center', cursor: 'pointer' }}>
+                                  <div style={{ fontSize: 18, marginBottom: 2 }}>{em}</div>
+                                  <div style={{ fontSize: 11, fontWeight: 800, color: cl }}>{lb}</div>
+                                  <div style={{ fontSize: 10, color: '#475569', fontWeight: 600 }}>${amt}</div>
+                                </div>
+                              </a>
+                            ))}
+                          </div>
+                        </Gate>
+                        {isPremium && (!cashTag || !paypalName) && <div onClick={() => setTab('manage')} style={{ marginTop: 8, background: '#1e3a5f', border: '1.5px solid #3b82f6', borderRadius: 10, padding: '7px 12px', fontSize: 12, color: '#93c5fd', fontWeight: 600, textAlign: 'center', cursor: 'pointer' }}>⚙️ Set up pay usernames in Manage tab →</div>}
                       </div>
-                      {(!cashTag || !paypalName) && <div onClick={() => setTab('manage')} style={{ marginTop: 8, background: '#1e3a5f', border: '1.5px solid #3b82f6', borderRadius: 10, padding: '7px 12px', fontSize: 12, color: '#93c5fd', fontWeight: 600, textAlign: 'center', cursor: 'pointer' }}>⚙️ Set up pay usernames in Manage tab →</div>}
                     </div>
                   )
                 })
@@ -361,13 +436,19 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
         {/* MANAGE */}
         {tab === 'manage' && (
           <div>
-            {/* Pay links */}
+            {/* Pay links settings — gated */}
             <div style={{ marginBottom: 22 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 17, color: '#f59e0b' }}>💸 Pay Links</div>
-                {!editPay && <button onClick={() => setEditPay(true)} style={{ background: '#f59e0b22', border: '1.5px solid #f59e0b', borderRadius: 10, padding: '5px 12px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 12, color: '#f59e0b', cursor: 'pointer' }}>✏️ Edit</button>}
+                {isPremium && !editPay && <button onClick={() => setEditPay(true)} style={{ background: '#f59e0b22', border: '1.5px solid #f59e0b', borderRadius: 10, padding: '5px 12px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 12, color: '#f59e0b', cursor: 'pointer' }}>✏️ Edit</button>}
               </div>
-              {editPay ? (
+              {!isPremium ? (
+                <Gate isPremium={false} featureName="Pay Links" onCheckout={checkout} busy={checkoutBusy}>
+                  <div style={{ background: '#1e293b', border: '1.5px solid #334155', borderRadius: 14, padding: '12px 16px' }}>
+                    <div style={{ fontSize: 13, color: '#475569', fontWeight: 600 }}>Set up Venmo, Cash App and PayPal links to send real money after approving chores.</div>
+                  </div>
+                </Gate>
+              ) : editPay ? (
                 <div style={{ background: '#1e293b', border: '2px solid #f59e0b', borderRadius: 18, padding: 16 }}>
                   {[['💙 Venmo Username','e.g. john-smith',venmoName,setVenmoName],['💚 Cash App $tag','e.g. johnsmith',cashTag,setCashTag],['💛 PayPal.me Username','e.g. johnsmith',paypalName,setPaypalName]].map(([l,p,v,s]) => (
                     <div key={l} style={{ marginBottom: 12 }}>
@@ -393,14 +474,31 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
                 </div>
               )}
             </div>
-            <ManageTab kid={kid} onSave={onSaveChore} onDelete={onDeleteChore} onGoal={onSaveGoal} showToast={showToast} />
+            <ManageTab kid={kid} isPremium={isPremium} onSave={onSaveChore} onDelete={onDeleteChore} onGoal={onSaveGoal} onAddKid={onAddKid} showToast={showToast} onCheckout={checkout} checkoutBusy={checkoutBusy} />
           </div>
         )}
 
-        {tab === 'summary'     && <><div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 18, color: '#f59e0b', marginBottom: 14 }}>Weekly Report 📋</div><WeeklySummary kid={kid} /></>}
-        {tab === 'leaderboard' && <><div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 18, color: '#f59e0b', marginBottom: 14 }}>Leaderboard 🏆</div><Leaderboard kids={data.kids} /></>}
+        {/* SUMMARY — gated */}
+        {tab === 'summary' && (
+          <>
+            <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 18, color: '#f59e0b', marginBottom: 14 }}>Weekly Report 📋</div>
+            <Gate isPremium={isPremium} featureName="Weekly Reports" onCheckout={checkout} busy={checkoutBusy}>
+              <WeeklySummary kid={kid} />
+            </Gate>
+          </>
+        )}
 
-        {/* UPGRADE */}
+        {/* LEADERBOARD — gated */}
+        {tab === 'leaderboard' && (
+          <>
+            <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 18, color: '#f59e0b', marginBottom: 14 }}>Leaderboard 🏆</div>
+            <Gate isPremium={isPremium} featureName="Leaderboard" onCheckout={checkout} busy={checkoutBusy}>
+              <Leaderboard kids={data.kids} />
+            </Gate>
+          </>
+        )}
+
+        {/* UPGRADE PAGE */}
         {tab === 'upgrade' && (
           <div style={{ animation: 'fadeIn 0.3s ease' }}>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -413,18 +511,16 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
                 <div><div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 22, color: 'white' }}>Premium</div><div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Billed monthly</div></div>
                 <div style={{ textAlign: 'right' }}><div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 34, color: '#f59e0b' }}>$9.99</div><div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>per month</div></div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {[['👨‍👩‍👧','Unlimited kids','Free plan: 1 kid'],['💸','Pay links','Venmo, Cash App & PayPal'],['🛍️','Reward Store','Kids redeem coins for treats'],['📋','Weekly Reports','Earnings charts & history'],['🏆','Leaderboard','Fun competition between kids'],['🔔','Push Notifications','Instant alerts on any device']].map(([ic,t,d]) => (
-                  <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                    <span style={{ fontSize: 20, flexShrink: 0 }}>{ic}</span>
-                    <div><div style={{ fontWeight: 800, color: 'white', fontSize: 14 }}>{t}</div><div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{d}</div></div>
-                  </div>
-                ))}
-              </div>
+              {[['👨‍👩‍👧','Unlimited kids','Free plan: 1 kid only'],['💸','Pay links','Venmo, Cash App & PayPal'],['🛍️','Full Reward Store','Kids redeem coins for treats'],['📋','Weekly Reports','Earnings charts & history'],['🏆','Leaderboard','Fun competition between kids']].map(([ic,t,d]) => (
+                <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
+                  <span style={{ fontSize: 20, flexShrink: 0 }}>{ic}</span>
+                  <div><div style={{ fontWeight: 800, color: 'white', fontSize: 14 }}>{t}</div><div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{d}</div></div>
+                </div>
+              ))}
             </div>
             <div style={{ background: '#1e293b', border: '1.5px solid #334155', borderRadius: 16, padding: '14px 16px', marginBottom: 20 }}>
-              <div style={{ fontWeight: 800, color: '#64748b', fontSize: 11, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Free plan includes</div>
-              {['✅ 1 kid','✅ Basic chores','✅ Coin balance','✅ Savings goal','❌ Multiple kids','❌ Pay links, Store, Reports'].map(f => (
+              <div style={{ fontWeight: 800, color: '#64748b', fontSize: 11, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Your free plan includes</div>
+              {['✅ 1 kid','✅ Chores & approval flow','✅ Coin balance tracker','✅ Savings goal','❌ Multiple kids','❌ Pay links, Reward Store, Reports, Leaderboard'].map(f => (
                 <div key={f} style={{ fontSize: 13, color: f.startsWith('✅')?'#94a3b8':'#475569', fontWeight: 600, marginBottom: 4 }}>{f}</div>
               ))}
             </div>
@@ -444,7 +540,7 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
               <div style={{ fontSize: 14, color: '#64748b', fontWeight: 600 }}>All features unlocked</div>
             </div>
             <div style={{ background: '#1e293b', border: '2px solid #22c55e', borderRadius: 20, padding: 18, marginBottom: 16 }}>
-              {[['👨‍👩‍👧','Unlimited kids'],['💸','Pay links'],['🛍️','Reward Store'],['📋','Weekly Reports'],['🏆','Leaderboard'],['🔔','Push Notifications']].map(([ic,l]) => (
+              {[['👨‍👩‍👧','Unlimited kids'],['💸','Pay links'],['🛍️','Reward Store'],['📋','Weekly Reports'],['🏆','Leaderboard']].map(([ic,l]) => (
                 <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                   <span style={{ fontSize: 20 }}>{ic}</span>
                   <span style={{ fontWeight: 700, color: 'white', fontSize: 14, flex: 1 }}>{l}</span>

@@ -2,12 +2,16 @@ import { useState } from 'react'
 import { KID_AVATARS, SUGGESTED_CHORES } from '../lib/constants'
 import { inp, lbl } from './UI'
 
+// Free plan: 1 kid max. Kids can only be added during onboarding on free.
+// Premium: up to 4 kids.
+const FREE_KID_LIMIT = 1
+
 export function Onboarding({ onComplete }) {
-  const [step, setStep]   = useState(0)
-  const [pName, setPName] = useState('')
+  const [step, setStep]     = useState(0)
+  const [pName, setPName]   = useState('')
   const [pEmail, setPEmail] = useState('')
-  const [pPw, setPPw]     = useState('')
-  const [kids, setKids]   = useState([{ id: 1, name: '', age: '', avatar: '🦊', pw: '' }])
+  const [pPw, setPPw]       = useState('')
+  const [kids, setKids]     = useState([{ id: 1, name: '', age: '', avatar: '🦊', pw: '' }])
   const [kidIdx, setKidIdx] = useState(0)
   const [chores, setChores] = useState({})
   const [goals, setGoals]   = useState({})
@@ -49,9 +53,8 @@ export function Onboarding({ onComplete }) {
     return !Object.keys(e).length
   }
 
-  const next = () => { if (validate()) setStep(s => s + 1) }
-  const back = () => { setStep(s => s - 1); setErrors({}) }
-
+  const next   = () => { if (validate()) setStep(s => s + 1) }
+  const back   = () => { setStep(s => s - 1); setErrors({}) }
   const finish = () => onComplete({ parentName: pName, email: pEmail, password: pPw, kids, selectedChores: chores, goals })
 
   const s = { background: 'linear-gradient(160deg,#0f172a,#1e293b)', minHeight: '100vh', padding: '24px 20px 40px', fontFamily: "'Nunito',sans-serif" }
@@ -85,7 +88,15 @@ export function Onboarding({ onComplete }) {
               <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: 14 }}>{txt}</span>
             </div>
           ))}
-          <button onClick={() => setStep(1)} style={{ width: '100%', marginTop: 20, background: 'linear-gradient(135deg,#f59e0b,#f97316)', border: 'none', borderRadius: 16, padding: 16, fontFamily: "'Fredoka One',cursive", fontSize: 22, color: 'white', cursor: 'pointer' }}>
+          {/* Free plan info */}
+          <div style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: 14, padding: '12px 16px', marginTop: 4, marginBottom: 20, textAlign: 'left' }}>
+            <div style={{ fontWeight: 800, color: '#f59e0b', fontSize: 13, marginBottom: 6 }}>🆓 Free Plan includes:</div>
+            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600, lineHeight: 1.8 }}>
+              ✅ 1 kid · ✅ Chores & approval · ✅ Coin balance · ✅ Savings goal<br />
+              🔒 Upgrade for pay links, store, reports & leaderboard
+            </div>
+          </div>
+          <button onClick={() => setStep(1)} style={{ width: '100%', background: 'linear-gradient(135deg,#f59e0b,#f97316)', border: 'none', borderRadius: 16, padding: 16, fontFamily: "'Fredoka One',cursive", fontSize: 22, color: 'white', cursor: 'pointer' }}>
             Set Up My Family 🚀
           </button>
           <button onClick={() => onComplete(null)} style={{ marginTop: 12, background: 'transparent', border: 'none', color: '#475569', fontFamily: "'Nunito',sans-serif", fontWeight: 700, fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}>
@@ -115,7 +126,7 @@ export function Onboarding({ onComplete }) {
             {errors.pPw && <div style={{ color: '#ef4444', fontSize: 12, fontWeight: 700, marginTop: 4 }}>{errors.pPw}</div>}
           </div>
           <div style={{ background: '#0f172a', border: '1.5px solid #1e3a5f', borderRadius: 12, padding: '10px 14px', marginTop: 16 }}>
-            <div style={{ fontSize: 12, color: '#475569', fontWeight: 600 }}>💡 Parent dashboard login. Kids get their own PINs.</div>
+            <div style={{ fontSize: 12, color: '#475569', fontWeight: 600 }}>💡 This is for the parent dashboard. Kids get their own PINs.</div>
           </div>
         </div>
       )}
@@ -123,17 +134,25 @@ export function Onboarding({ onComplete }) {
       {/* Step 2 — Kids */}
       {step === 2 && (
         <div>
-          <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 26, color: 'white', marginBottom: 4 }}>Add Your Kids 👧👦</div>
-          <div style={{ color: '#64748b', fontSize: 14, fontWeight: 600, marginBottom: 20 }}>Each kid gets their own login.</div>
+          <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 26, color: 'white', marginBottom: 4 }}>Add Your Kid 👧👦</div>
+          <div style={{ color: '#64748b', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Free plan includes 1 kid. Upgrade for more.</div>
+
+          {/* Free plan badge */}
+          <div style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: 12, padding: '8px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 14 }}>🔒</span>
+            <span style={{ fontSize: 12, color: '#475569', fontWeight: 700 }}>Want more kids? Upgrade to Premium after setup.</span>
+          </div>
+
           {kids.length > 1 && (
             <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
               {kids.map((k, i) => (
-                <button key={k.id} onClick={() => setKidIdx(i)} style={{ flex: 1, background: kidIdx === i ? '#f59e0b' : '#1e293b', border: kidIdx === i ? 'none' : '1.5px solid #334155', borderRadius: 12, padding: '8px 4px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 13, color: kidIdx === i ? '#1e293b' : '#64748b', cursor: 'pointer' }}>
+                <button key={k.id} onClick={() => setKidIdx(i)} style={{ flex: 1, background: kidIdx===i?'#f59e0b':'#1e293b', border: kidIdx===i?'none':'1.5px solid #334155', borderRadius: 12, padding: '8px 4px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 13, color: kidIdx===i?'#1e293b':'#64748b', cursor: 'pointer' }}>
                   {k.avatar} {k.name || `Kid ${i+1}`}
                 </button>
               ))}
             </div>
           )}
+
           <div style={{ background: '#1e293b', border: '1.5px solid #334155', borderRadius: 20, padding: 18, marginBottom: 14 }}>
             <div style={{ marginBottom: 14 }}>
               <label style={lbl}>Avatar</label>
@@ -161,14 +180,25 @@ export function Onboarding({ onComplete }) {
               {errors[`kp${kidIdx}`] && <div style={{ color: '#ef4444', fontSize: 12, fontWeight: 700, marginTop: 4 }}>{errors[`kp${kidIdx}`]}</div>}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {kids.length < 4 && (
-              <button onClick={() => { const id = Date.now(); setKids(p => [...p, { id, name: '', age: '', avatar: '🐼', pw: '' }]); setKidIdx(kids.length) }} style={{ flex: 1, background: '#22c55e15', border: '1.5px solid #22c55e', borderRadius: 12, padding: 10, fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 13, color: '#22c55e', cursor: 'pointer' }}>+ Add Kid</button>
-            )}
-            {kids.length > 1 && (
-              <button onClick={() => { setKids(p => p.filter((_,i) => i !== kidIdx)); setKidIdx(Math.max(0, kidIdx-1)) }} style={{ background: '#ef444415', border: '1.5px solid #ef4444', borderRadius: 12, padding: '10px 16px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 13, color: '#ef4444', cursor: 'pointer' }}>Remove</button>
-            )}
-          </div>
+
+          {/* Only show Add Kid if below free limit — greyed with upgrade note otherwise */}
+          {kids.length < FREE_KID_LIMIT ? (
+            <button onClick={() => { const id = Date.now(); setKids(p => [...p, { id, name: '', age: '', avatar: '🐼', pw: '' }]); setKidIdx(kids.length) }}
+              style={{ width: '100%', background: '#22c55e15', border: '1.5px solid #22c55e', borderRadius: 12, padding: 10, fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 13, color: '#22c55e', cursor: 'pointer' }}>
+              + Add Another Kid
+            </button>
+          ) : (
+            <div style={{ background: '#1e293b', border: '1.5px dashed #334155', borderRadius: 12, padding: '12px 16px', textAlign: 'center' }}>
+              <div style={{ fontSize: 13, color: '#475569', fontWeight: 700 }}>🔒 Add more kids with Premium ($9.99/mo)</div>
+            </div>
+          )}
+
+          {kids.length > 1 && (
+            <button onClick={() => { setKids(p => p.filter((_,i) => i !== kidIdx)); setKidIdx(Math.max(0, kidIdx-1)) }}
+              style={{ width: '100%', marginTop: 8, background: '#ef444415', border: '1.5px solid #ef4444', borderRadius: 12, padding: '10px 16px', fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 13, color: '#ef4444', cursor: 'pointer' }}>
+              Remove This Kid
+            </button>
+          )}
         </div>
       )}
 
@@ -188,7 +218,8 @@ export function Onboarding({ onComplete }) {
             {SUGGESTED_CHORES.map(c => {
               const sel = (chores[kid.id]||[]).find(x => x.title === c.title)
               return (
-                <div key={c.title} onClick={() => { toggleChore(kid.id, c); setErrors(x => ({...x, [`ch${kid.id}`]:null})) }} style={{ background: sel?'#f59e0b15':'#1e293b', border: sel?'2px solid #f59e0b':'1.5px solid #334155', borderRadius: 16, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                <div key={c.title} onClick={() => { toggleChore(kid.id, c); setErrors(x => ({...x, [`ch${kid.id}`]:null})) }}
+                  style={{ background: sel?'#f59e0b15':'#1e293b', border: sel?'2px solid #f59e0b':'1.5px solid #334155', borderRadius: 16, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
                   <span style={{ fontSize: 24 }}>{c.icon}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 800, color: 'white', fontSize: 13 }}>{c.title}</div>
@@ -205,8 +236,8 @@ export function Onboarding({ onComplete }) {
       {/* Step 4 — Goals */}
       {step === 4 && (
         <div>
-          <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 26, color: 'white', marginBottom: 4 }}>Savings Goals 🎯</div>
-          <div style={{ color: '#64748b', fontSize: 14, fontWeight: 600, marginBottom: 20 }}>What is each kid saving for?</div>
+          <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 26, color: 'white', marginBottom: 4 }}>Savings Goal 🎯</div>
+          <div style={{ color: '#64748b', fontSize: 14, fontWeight: 600, marginBottom: 20 }}>What is your kid saving for?</div>
           {kids.map(k => (
             <div key={k.id} style={{ background: '#1e293b', border: '1.5px solid #334155', borderRadius: 20, padding: 16, marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>

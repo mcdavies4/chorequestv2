@@ -112,6 +112,14 @@ export default function App() {
     catch (e) { showToast(`❌ ${e.message}`) }
   }
 
+  // Premium: add a kid from the manage tab
+  const handleAddKid = () => {
+    showToast('➕ Adding kids — coming from Manage tab')
+    // For now direct to onboarding-style modal — simplest approach
+    // is to show a toast guiding them. Full add-kid flow can be a future feature.
+    showToast('📧 Contact us to add another kid — feature coming soon!')
+  }
+
   if (screen === 'loading' || loading) return <><style>{GLOBAL_STYLES}</style><Spinner /></>
 
   return (
@@ -138,6 +146,7 @@ export default function App() {
         {screen === 'kid' && kidUser && (
           <KidView
             kid={kids.find(k => k.id === kidUser.id) || kidUser}
+            isPremium={isPremium}
             onMarkDone={handleMarkDone}
             onLogout={handleLogout}
             onRedeem={handleRedeem}
@@ -158,6 +167,7 @@ export default function App() {
             onSaveChore={handleSaveChore}
             onDeleteChore={handleDeleteChore}
             onSaveGoal={handleSaveGoal}
+            onAddKid={handleAddKid}
             showToast={showToast}
             activeKidId={activeKidId || kids[0]?.id}
             setActiveKidId={setActiveKidId}

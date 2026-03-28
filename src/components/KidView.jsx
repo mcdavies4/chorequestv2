@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ProgressBar } from './UI'
 import { REWARDS } from '../lib/constants'
 
-export function KidView({ kid, onMarkDone, onLogout, onRedeem }) {
+export function KidView({ kid, isPremium, onMarkDone, onLogout, onRedeem }) {
   const [tab, setTab] = useState('chores')
 
   const chores   = kid.chores || []
@@ -72,32 +72,43 @@ export function KidView({ kid, onMarkDone, onLogout, onRedeem }) {
           </>
         )}
 
-        {/* STORE */}
+        {/* STORE — gated */}
         {tab === 'store' && (
           <>
             <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 18, color: '#92400e', marginBottom: 14 }}>Reward Store 🛍️</div>
-            {cats.map(cat => (
-              <div key={cat} style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>{cat}</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {REWARDS.filter(r => r.category===cat).map(r => {
-                    const can = balance >= r.cost
-                    return (
-                      <div key={r.id} style={{ background: 'white', border: `2px solid ${can?'#fde68a':'#f1f5f9'}`, borderRadius: 18, padding: '13px 15px', display: 'flex', alignItems: 'center', gap: 11, opacity: can?1:0.5 }}>
-                        <div style={{ fontSize: 28 }}>{r.icon}</div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 800, fontSize: 13, color: '#1e293b' }}>{r.title}</div>
-                          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{r.subtitle}</div>
-                        </div>
-                        <button onClick={() => can && onRedeem(kid.id, r)} disabled={!can} style={{ background: can?'#f59e0b':'#e2e8f0', border: 'none', borderRadius: 11, padding: '7px 11px', fontFamily: "'Fredoka One',cursive", fontSize: 13, color: can?'#1e293b':'#94a3b8', cursor: can?'pointer':'not-allowed', whiteSpace: 'nowrap' }}>
-                          🪙 ${r.cost.toFixed(2)}
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
+            {!isPremium ? (
+              <div style={{ background: 'white', border: '2px dashed #fde68a', borderRadius: 20, padding: 30, textAlign: 'center' }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>🔒</div>
+                <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 20, color: '#92400e', marginBottom: 8 }}>Premium Feature</div>
+                <div style={{ fontSize: 14, color: '#b45309', fontWeight: 600, marginBottom: 4 }}>The Reward Store is only available on the Premium plan.</div>
+                <div style={{ fontSize: 13, color: '#d97706', fontWeight: 600 }}>Ask your parent to upgrade! 🚀</div>
               </div>
-            ))}
+            ) : (
+              <>
+                {cats.map(cat => (
+                  <div key={cat} style={{ marginBottom: 18 }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>{cat}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {REWARDS.filter(r => r.category===cat).map(r => {
+                        const can = balance >= r.cost
+                        return (
+                          <div key={r.id} style={{ background: 'white', border: `2px solid ${can?'#fde68a':'#f1f5f9'}`, borderRadius: 18, padding: '13px 15px', display: 'flex', alignItems: 'center', gap: 11, opacity: can?1:0.5 }}>
+                            <div style={{ fontSize: 28 }}>{r.icon}</div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 800, fontSize: 13, color: '#1e293b' }}>{r.title}</div>
+                              <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{r.subtitle}</div>
+                            </div>
+                            <button onClick={() => can && onRedeem(kid.id, r)} disabled={!can} style={{ background: can?'#f59e0b':'#e2e8f0', border: 'none', borderRadius: 11, padding: '7px 11px', fontFamily: "'Fredoka One',cursive", fontSize: 13, color: can?'#1e293b':'#94a3b8', cursor: can?'pointer':'not-allowed', whiteSpace: 'nowrap' }}>
+                              🪙 ${r.cost.toFixed(2)}
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </>
         )}
 
