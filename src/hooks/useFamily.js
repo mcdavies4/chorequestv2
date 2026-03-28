@@ -68,8 +68,15 @@ export function useFamily(familyId) {
 
   const addChore = useCallback(async (kidId, chore) => {
     const { error } = await supabase.from('chores').insert({
-      kid_id: kidId, family_id: familyId,
-      title: chore.title, icon: chore.icon, coins: chore.coins,
+      kid_id:             kidId,
+      family_id:          familyId,
+      title:              chore.title,
+      icon:               chore.icon,
+      coins:              chore.coins,
+      recur_type:         chore.recur_type         || 'once',
+      recur_days:         chore.recur_days         || null,
+      recur_day_of_month: chore.recur_day_of_month || null,
+      photo_required:     chore.photo_required     || false,
     })
     if (error) throw error
   }, [familyId])
