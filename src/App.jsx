@@ -13,7 +13,7 @@ import { ParentView }  from './components/ParentView'
 
 export default function App() {
   const { user, family, loading, signUp, signIn, signOut } = useAuth()
-  const { kids, notifications, reload, markPending, approve, reject,
+  const { kids, notifications, reload, loadWeeklyHistory, markPending, approve, reject,
           addChore, updateChore, deleteChore, updateGoal, redeemReward, markRead } = useFamily(family?.id)
   const { plan, isPremium } = useSubscription(family?.id)
 
@@ -25,18 +25,24 @@ export default function App() {
 
   const showToast = msg => setToast(msg)
 
-  // Route once auth resolves
+  // Route as soon as we know enough — don't wait for everything
   useEffect(() => {
+    // Still waiting for Supabase to respond
     if (loading) return
-    if (user && family) { setScreen('app'); return }
-    if (user && !family) { setScreen('app'); return } // family loading
-    const seen = sessionStorage.getItem('cq_seen')
-    setScreen(seen ? 'login' : 'onboarding')
-  }, [loading, user, family])
+
+    if (user) {
+      // User is logged in — go to app immediately
+      // ParentView handles the "kids still loading" state gracefully
+      setScreen('app')
+    } else {
+      // No user
+      const seen = sessionStorage.getItem('cq_seen')
+      setScreen(seen ? 'login' : 'onboarding')
+    }
+  }, [loading, user])
 
   useEffect(() => { sessionStorage.setItem('cq_seen', '1') }, [])
 
-  // Set first kid as active
   useEffect(() => {
     if (kids.length > 0 && !activeKidId) setActiveKidId(kids[0].id)
   }, [kids])
@@ -62,8 +68,10 @@ export default function App() {
   }
 
   const handleLogout = async () => {
-    await signOut(); setKidUser(null); setActiveKidId(null)
-    sessionStorage.removeItem('cq_seen'); setScreen('onboarding')
+    await signOut()
+    setKidUser(null); setActiveKidId(null)
+    sessionStorage.clear()
+    setScreen('onboarding')
   }
 
   const handleMarkDone = async (kidId, choreId, e) => {
@@ -92,7 +100,7 @@ export default function App() {
 
   const handleSaveChore = async (kidId, chore) => {
     try {
-      if (chore.id) await updateChore(chore.id, { title: chore.title, icon: chore.icon, coins: chore.coins })
+      if (chore.id) await updateChore(chore.id, { title: chore.title, icon: chore.icon, coins: chore.coins, recur_type: chore.recur_type, recur_days: chore.recur_days, recur_day_of_month: chore.recur_day_of_month, photo_required: chore.photo_required })
       else          await addChore(kidId, chore)
     } catch (e) { showToast(`❌ ${e.message}`) }
   }
@@ -112,15 +120,14 @@ export default function App() {
     catch (e) { showToast(`❌ ${e.message}`) }
   }
 
-  // Premium: add a kid from the manage tab
   const handleAddKid = () => {
-    showToast('➕ Adding kids — coming from Manage tab')
-    // For now direct to onboarding-style modal — simplest approach
-    // is to show a toast guiding them. Full add-kid flow can be a future feature.
-    showToast('📧 Contact us to add another kid — feature coming soon!')
+    showToast('➕ Go to Settings → Add Kid — feature coming soon!')
   }
 
-  if (screen === 'loading' || loading) return <><style>{GLOBAL_STYLES}</style><Spinner /></>
+  // Only show full spinner on very first load ever (no cache at all)
+  if (screen === 'loading') {
+    return <><style>{GLOBAL_STYLES}</style><Spinner /></>
+  }
 
   return (
     <>
@@ -168,6 +175,7 @@ export default function App() {
             onDeleteChore={handleDeleteChore}
             onSaveGoal={handleSaveGoal}
             onAddKid={handleAddKid}
+            loadWeeklyHistory={loadWeeklyHistory}
             showToast={showToast}
             activeKidId={activeKidId || kids[0]?.id}
             setActiveKidId={setActiveKidId}
