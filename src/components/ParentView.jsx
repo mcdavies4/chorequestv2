@@ -1,8 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { ProgressBar, inp, lbl } from './UI'
-import { CHORE_ICONS, REWARDS } from '../lib/constants'
+import { CHORE_ICONS } from '../lib/constants'
 import { startCheckout, openBillingPortal } from '../lib/stripe'
-import { supabase } from '../lib/supabase'
 
 // ── Recurring helpers ─────────────────────────────────────────
 const RECUR_OPTIONS = [
