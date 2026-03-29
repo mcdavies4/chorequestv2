@@ -116,9 +116,21 @@ function Leaderboard({ kids }) {
 }
 
 // ── Weekly Summary ────────────────────────────────────────────
-function WeeklySummary({ kid }) {
-  const history = kid.weekly_history ?? []
-  const [sel, setSel] = useState(0)
+function WeeklySummary({ kid, loadWeeklyHistory }) {
+  const [history, setHistory] = useState(kid.weekly_history || [])
+  const [loading, setLoading] = useState(false)
+  const [sel, setSel]         = useState(0)
+
+  useEffect(() => {
+    if (history.length > 0) return
+    setLoading(true)
+    loadWeeklyHistory(kid.id).then(data => {
+      setHistory(data)
+      setLoading(false)
+    })
+  }, [kid.id])
+
+  if (loading) return <div style={{ textAlign:'center', padding:40, color:'#475569', fontWeight:700 }}>Loading report...</div>
   if (!history.length) return <div style={{ color:'#475569', fontWeight:700, padding:20, textAlign:'center' }}>No history yet.</div>
   const w=history[sel], done=Number(w.chores_completed??0), tot=Number(w.total_chores??1)
   const pct=tot>0?Math.round((done/tot)*100):0
@@ -345,7 +357,7 @@ function ManageTab({ kid, isPremium, onSave, onDelete, onGoal, onAddKid, showToa
 }
 
 // ── Main ParentView ───────────────────────────────────────────
-export function ParentView({ data, plan, isPremium, familyId, userEmail, onApprove, onReject, onLogout, onMarkRead, onSaveChore, onDeleteChore, onSaveGoal, onAddKid, showToast, activeKidId, setActiveKidId }) {
+export function ParentView({ data, plan, isPremium, familyId, userEmail, onApprove, onReject, onLogout, onMarkRead, onSaveChore, onDeleteChore, onSaveGoal, onAddKid, loadWeeklyHistory, showToast, activeKidId, setActiveKidId }) {
   const [tab,          setTab]          = useState('home')
   const [checkoutBusy, setCheckoutBusy] = useState(false)
   const [cashTag,      setCashTag]      = useState(() => localStorage.getItem('cq_cash') || '')
@@ -599,7 +611,7 @@ export function ParentView({ data, plan, isPremium, familyId, userEmail, onAppro
           </div>
         )}
 
-        {tab==='summary'     && <><div style={{ fontFamily:"'Fredoka One',cursive", fontSize:18, color:'#f59e0b', marginBottom:14 }}>Weekly Report 📋</div><Gate isPremium={isPremium} featureName="Weekly Reports" onCheckout={checkout} busy={checkoutBusy}><WeeklySummary kid={kid} /></Gate></>}
+        {tab==='summary'     && <><div style={{ fontFamily:"'Fredoka One',cursive", fontSize:18, color:'#f59e0b', marginBottom:14 }}>Weekly Report 📋</div><Gate isPremium={isPremium} featureName="Weekly Reports" onCheckout={checkout} busy={checkoutBusy}><WeeklySummary kid={kid} loadWeeklyHistory={loadWeeklyHistory} /></Gate></>}
         {tab==='leaderboard' && <><div style={{ fontFamily:"'Fredoka One',cursive", fontSize:18, color:'#f59e0b', marginBottom:14 }}>Leaderboard 🏆</div><Gate isPremium={isPremium} featureName="Leaderboard" onCheckout={checkout} busy={checkoutBusy}><Leaderboard kids={data.kids} /></Gate></>}
 
         {/* UPGRADE */}
