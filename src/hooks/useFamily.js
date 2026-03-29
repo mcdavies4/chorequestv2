@@ -1,41 +1,65 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
+// Cache kids in sessionStorage — renders instantly on refresh
+const getKidsCache  = (fid) => { try { return JSON.parse(sessionStorage.getItem(`cq_kids_${fid}`)) || [] } catch { return [] } }
+const setKidsCache  = (fid, d) => { try { sessionStorage.setItem(`cq_kids_${fid}`, JSON.stringify(d)) } catch {} }
+
 export function useFamily(familyId) {
-  const [kids,          setKids]          = useState([])
+  const cached = familyId ? getKidsCache(familyId) : []
+  const [kids,          setKids]          = useState(cached)
   const [notifications, setNotifications] = useState([])
-  const [loading,       setLoading]       = useState(true)
+  const [loading,       setLoading]       = useState(cached.length === 0)
 
   const load = useCallback(async () => {
     if (!familyId) { setLoading(false); return }
-    const [k, n] = await Promise.all([
-      supabase.from('kids')
-        .select('*, chores(*), redeemed_rewards(*), weekly_history(*)')
-        .eq('family_id', familyId).order('created_at', { ascending: true }),
-      supabase.from('notifications')
-        .select('*').eq('family_id', familyId)
-        .order('created_at', { ascending: false }).limit(50),
-    ])
-    setKids(k.data || [])
-    setNotifications(n.data || [])
-    setLoading(false)
+    // Don't show spinner if we have cache — update silently
+    try {
+      const [k, n] = await Promise.all([
+        // Exclude weekly_history from main load — it's heavy and only needed on reports tab
+        supabase.from('kids')
+          .select('*, chores(*), redeemed_rewards(*)')
+          .eq('family_id', familyId)
+          .order('created_at', { ascending: true }),
+        supabase.from('notifications')
+          .select('*').eq('family_id', familyId)
+          .order('created_at', { ascending: false }).limit(30),
+      ])
+      const kidsData = k.data || []
+      setKids(kidsData)
+      setNotifications(n.data || [])
+      setKidsCache(familyId, kidsData)
+    } catch (e) {
+      console.error('useFamily load error:', e)
+    } finally {
+      setLoading(false)
+    }
   }, [familyId])
+
+  // Separate function to load weekly_history — only called when reports tab opens
+  const loadWeeklyHistory = useCallback(async (kidId) => {
+    const { data } = await supabase
+      .from('weekly_history')
+      .select('*')
+      .eq('kid_id', kidId)
+      .order('created_at', { ascending: true })
+    return data || []
+  }, [])
 
   useEffect(() => { load() }, [load])
 
   // Realtime
   useEffect(() => {
     if (!familyId) return
-    const ch = supabase.channel('rt')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chores',        filter: `family_id=eq.${familyId}` }, load)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'kids',          filter: `family_id=eq.${familyId}` }, load)
+    const ch = supabase.channel('rt_' + familyId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chores', filter: `family_id=eq.${familyId}` }, load)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'kids',   filter: `family_id=eq.${familyId}` }, load)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `family_id=eq.${familyId}` },
         (p) => setNotifications(prev => [p.new, ...prev]))
       .subscribe()
     return () => supabase.removeChannel(ch)
   }, [familyId, load])
 
-  // Mark chore pending (kid submits)
   const markPending = useCallback(async (choreId, kidId, kidName, choreTitle, famId) => {
     const fid = famId || familyId
     const { error } = await supabase.from('chores').update({ pending: true }).eq('id', choreId)
@@ -46,7 +70,6 @@ export function useFamily(familyId) {
     })
   }, [familyId])
 
-  // Parent approves
   const approve = useCallback(async (choreId, kidId, coins) => {
     const { error: ce } = await supabase.from('chores').update({ done: true, pending: false }).eq('id', choreId)
     if (ce) throw ce
@@ -60,7 +83,6 @@ export function useFamily(familyId) {
     if (ue) throw ue
   }, [])
 
-  // Parent rejects
   const reject = useCallback(async (choreId) => {
     const { error } = await supabase.from('chores').update({ pending: false }).eq('id', choreId)
     if (error) throw error
@@ -116,5 +138,9 @@ export function useFamily(familyId) {
     }
   }, [familyId])
 
-  return { kids, notifications, loading, reload: load, markPending, approve, reject, addChore, updateChore, deleteChore, updateGoal, redeemReward, markRead }
+  return {
+    kids, notifications, loading, reload: load, loadWeeklyHistory,
+    markPending, approve, reject, addChore, updateChore, deleteChore,
+    updateGoal, redeemReward, markRead,
+  }
 }
