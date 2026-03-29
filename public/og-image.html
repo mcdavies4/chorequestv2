@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: #0f172a;
+      font-family: 'Nunito', sans-serif;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 0 70px;
+      gap: 60px;
+    }
+
+    /* Gradient background */
+    .bg-grad {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 80% 50%, #f59e0b0f, transparent),
+        radial-gradient(ellipse 400px 300px at 10% 80%, #6366f10a, transparent),
+        linear-gradient(135deg, #0f172a 0%, #1a2540 100%);
+    }
+
+    /* Decorative circles */
+    .circle { position: absolute; border-radius: 50%; }
+    .c1 { width: 500px; height: 500px; background: #f59e0b08; top: -180px; right: -80px; border: 1px solid #f59e0b15; }
+    .c2 { width: 300px; height: 300px; background: #6366f108; bottom: -120px; left: 300px; border: 1px solid #6366f115; }
+    .c3 { width: 150px; height: 150px; background: #f97316; top: -60px; left: 560px; filter: blur(80px); opacity: 0.15; }
+
+    /* Left content */
+    .left {
+      flex: 1;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .top-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245,158,11,0.12);
+      border: 1.5px solid rgba(245,158,11,0.35);
+      border-radius: 99px;
+      padding: 6px 18px;
+      width: fit-content;
+    }
+    .top-badge span { font-size: 12px; font-weight: 800; color: #f59e0b; letter-spacing: 1.5px; text-transform: uppercase; }
+
+    .title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 80px;
+      line-height: 0.95;
+      color: white;
+    }
+    .title .accent { color: #f59e0b; }
+
+    .tagline {
+      font-size: 21px;
+      font-weight: 700;
+      color: #94a3b8;
+      line-height: 1.5;
+      max-width: 460px;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .feat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feat-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #f59e0b;
+      flex-shrink: 0;
+    }
+    .feat span { font-size: 16px; font-weight: 700; color: #cbd5e1; }
+
+    .url-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 99px;
+      padding: 8px 18px;
+      width: fit-content;
+    }
+    .url-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    .url-bar span { font-size: 14px; font-weight: 800; color: #475569; letter-spacing: 0.3px; }
+
+    /* Right content */
+    .right {
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .trophy-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .trophy-glow {
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #f59e0b33 0%, transparent 70%);
+    }
+    .trophy { font-size: 140px; line-height: 1; position: relative; z-index: 1; }
+
+    .price-pill {
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+      border-radius: 20px;
+      padding: 14px 28px;
+      text-align: center;
+    }
+    .price-pill .free-txt { font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .price-pill .price-txt { font-family: 'Fredoka One', cursive; font-size: 32px; color: white; line-height: 1; }
+    .price-pill .mo-txt { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+    /* Floating elements */
+    .coin { position: absolute; font-size: 28px; opacity: 0.18; }
+    .coin1 { top: 50px; right: 370px; }
+    .coin2 { top: 200px; right: 300px; font-size: 18px; }
+    .coin3 { bottom: 90px; right: 380px; font-size: 22px; }
+    .coin4 { top: 80px; left: 20px; font-size: 20px; }
+  </style>
+</head>
+<body>
+  <!-- Backgrounds -->
+  <div class="bg-grad"></div>
+  <div class="circle c1"></div>
+  <div class="circle c2"></div>
+  <div class="circle c3"></div>
+
+  <!-- Floating coins -->
+  <div class="coin coin1">🪙</div>
+  <div class="coin coin2">⭐</div>
+  <div class="coin coin3">🪙</div>
+  <div class="coin coin4">✨</div>
+
+  <!-- Left -->
+  <div class="left">
+    <div class="top-badge"><span>🏆 Chore App for Kids</span></div>
+
+    <div class="title">Chore<br><span class="accent">Quest</span></div>
+
+    <div class="tagline">
+      The fun way to manage chores,<br>
+      reward effort & teach kids<br>
+      the value of money.
+    </div>
+
+    <div class="features">
+      <div class="feat"><div class="feat-dot"></div><span>⚡ Assign chores & track completion</span></div>
+      <div class="feat"><div class="feat-dot"></div><span>🪙 Coin rewards + Venmo / Cash App pay links</span></div>
+      <div class="feat"><div class="feat-dot"></div><span>🎯 Savings goals kids actually care about</span></div>
+      <div class="feat"><div class="feat-dot"></div><span>🏆 Leaderboard, streaks & reward store</span></div>
+    </div>
+
+    <div class="url-bar">
+      <div class="url-dot"></div>
+      <span>chorequestv2.vercel.app</span>
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div class="right">
+    <div class="trophy-wrap">
+      <div class="trophy-glow"></div>
+      <div class="trophy">🏆</div>
+    </div>
+    <div class="price-pill">
+      <div class="free-txt">Free to start</div>
+      <div class="price-txt">$9.99<span style="font-size:20px">/mo</span></div>
+      <div class="mo-txt">for Premium</div>
+    </div>
+  </div>
+</body>
+</html>

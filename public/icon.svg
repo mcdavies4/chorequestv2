@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background -->
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <!-- Amber glow ring -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#f59e0b" stroke-width="8" opacity="0.3"/>
+  <!-- Inner warm circle -->
+  <circle cx="256" cy="256" r="200" fill="#1e293b"/>
+  <!-- Trophy body - base -->
+  <rect x="196" y="370" width="120" height="20" rx="10" fill="#f59e0b"/>
+  <rect x="216" y="340" width="80" height="36" rx="6" fill="#f59e0b"/>
+  <!-- Trophy cup -->
+  <path d="M176 160 Q176 300 256 310 Q336 300 336 160 Z" fill="#f59e0b"/>
+  <!-- Trophy shine -->
+  <path d="M200 180 Q196 260 230 290" stroke="#fde68a" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <!-- Trophy handles -->
+  <path d="M176 180 Q140 180 140 220 Q140 260 176 260" stroke="#f59e0b" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <path d="M336 180 Q372 180 372 220 Q372 260 336 260" stroke="#f59e0b" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <!-- Stars -->
+  <text x="256" y="100" font-size="40" text-anchor="middle" fill="#f59e0b" opacity="0.6">★</text>
+  <text x="150" y="130" font-size="24" text-anchor="middle" fill="#f59e0b" opacity="0.4">★</text>
+  <text x="362" y="130" font-size="24" text-anchor="middle" fill="#f59e0b" opacity="0.4">★</text>
+</svg>
